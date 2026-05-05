@@ -1,10 +1,9 @@
-package io.game.accounts.common.audit;
+package io.game.loans.common.audit;
 
 import jakarta.annotation.Nonnull;
+import java.util.Optional;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component("auditWareConfigure")
 class AuditWareConfigure implements AuditorAware<String> {
@@ -12,6 +11,6 @@ class AuditWareConfigure implements AuditorAware<String> {
     @Nonnull
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of("ACCOUNTS_MS");
+        return Optional.of("LOANS_MS");
     }
 }
