@@ -1,4 +1,4 @@
-package io.game.accounts.mapper;
+package io.game.accounts.common.mapper;
 
 import io.game.accounts.common.dto.AccountsDto;
 import io.game.accounts.entity.Accounts;

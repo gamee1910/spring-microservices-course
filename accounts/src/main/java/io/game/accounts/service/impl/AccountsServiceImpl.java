@@ -7,8 +7,8 @@ import io.game.accounts.entity.Accounts;
 import io.game.accounts.entity.Customer;
 import io.game.accounts.exception.CustomerAlreadyExistsException;
 import io.game.accounts.exception.ResourceNotFoundException;
-import io.game.accounts.mapper.AccountsMapper;
-import io.game.accounts.mapper.CustomerMapper;
+import io.game.accounts.common.mapper.AccountsMapper;
+import io.game.accounts.common.mapper.CustomerMapper;
 import io.game.accounts.repository.AccountsRepository;
 import io.game.accounts.repository.CustomerRepository;
 import io.game.accounts.service.IAccountsService;
@@ -37,7 +37,7 @@ class AccountsServiceImpl implements IAccountsService {
     }
 
     @Override
-    public CustomerDto getCustomerWithMobilbeNumber(String mobileNumber) {
+    public CustomerDto fetchAccount(String mobileNumber) {
         Customer customer = customerRepository
                 .findByMobileNumber(mobileNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber));

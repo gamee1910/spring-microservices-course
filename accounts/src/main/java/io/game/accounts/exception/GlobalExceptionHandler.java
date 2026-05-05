@@ -1,15 +1,11 @@
 package io.game.accounts.exception;
 
-import io.game.accounts.common.dto.ResponseError;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.game.accounts.common.dto.ErrorResponseDto;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,38 +14,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = CustomerAlreadyExistsException.class)
-    ResponseEntity<ResponseError> handleCustomerAlreadyExistException(
-            CustomerAlreadyExistsException ex, WebRequest webRequest) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ResponseError.builder()
-                        .errorCode(HttpStatus.BAD_REQUEST)
-                        .errorMessage(ex.getMessage())
-                        .errorTime(LocalDateTime.now())
-                        .apiPath(webRequest.getDescription(false))
-                        .build());
-    }
-
-    @ExceptionHandler(value = ResourceNotFoundException.class)
-    ResponseEntity<ResponseError> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest webRequest) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ResponseError.builder()
-                        .errorCode(HttpStatus.NOT_FOUND)
-                        .errorMessage(ex.getMessage())
-                        .errorTime(LocalDateTime.now())
-                        .apiPath(webRequest.getDescription(false))
-                        .build());
-    }
-
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            @NonNull HttpHeaders headers,
-            @NonNull HttpStatusCode status,
-            @NonNull WebRequest request) {
+            MethodArgumentNotValidException ex, @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, @NonNull WebRequest request) {
         Map<String, String> validationErrors = new HashMap<>();
         List<ObjectError> validationErrorList = ex.getBindingResult().getAllErrors();
 
@@ -62,14 +38,39 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ResponseError> handleGlobalException(Exception exception, WebRequest webRequest) {
-        ResponseError errorResponseDTO = ResponseError.builder()
-                .errorCode(HttpStatus.INTERNAL_SERVER_ERROR)
-                .errorMessage(exception.getMessage())
-                .errorTime(LocalDateTime.now())
-                .apiPath(webRequest.getDescription(false))
-                .build();
-
+    public ResponseEntity<ErrorResponseDto> handleGlobalException(Exception exception,
+                                                                  WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(ResourceNotFoundException exception,
+                                                                            WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.NOT_FOUND,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CustomerAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleCustomerAlreadyExistsException(CustomerAlreadyExistsException exception,
+                                                                                 WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+    }
+
 }
